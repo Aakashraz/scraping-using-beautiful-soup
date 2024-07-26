@@ -25,3 +25,12 @@ with open('scraped_quotes.csv', 'w') as file:
     for quote, author in zip(quotes, authors):
         print(f"{quote.text} - {author.text}")
         writer.writerow([quote.text,  author.text])
+
+# The zip() function takes multiple iterables (like lists or tuples) and combines them into a single iterator of tuples.
+# Each tuple contains elements from the iterables at the same position.
+# Example:
+# Suppose quotes = ["Quote1", "Quote2"] and authors = ["Author1", "Author2"].
+#
+#     zip(quotes, authors) produces:
+#         First iteration: ("Quote1", "Author1")
+#         Second iteration: ("Quote2", "Author2")
