@@ -24,7 +24,7 @@ with open('scraped_quotes.csv', 'w') as file:
 
     for quote, author in zip(quotes, authors):
         print(f"{quote.text} - {author.text}")
-        writer.writerow([quote.text,  author.text])
+        writer.writerow([quote.text, author.text])
 
 # The zip() function takes multiple iterables (like lists or tuples) and combines them into a single iterator of tuples.
 # Each tuple contains elements from the iterables at the same position.
@@ -34,3 +34,10 @@ with open('scraped_quotes.csv', 'w') as file:
 #     zip(quotes, authors) produces:
 #         First iteration: ("Quote1", "Author1")
 #         Second iteration: ("Quote2", "Author2")
+
+
+
+# --------------------  Using Selenium  --------------------------
+
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
