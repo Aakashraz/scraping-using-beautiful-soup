@@ -44,11 +44,11 @@ import time
 import getpass
 
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 
 driver = webdriver.Chrome()
-driver.get('https://www.quotes.toscrape.com/')
+driver.get('https://quotes.toscrape.com/')
 
-time.sleep(3)
 login_page = driver.find_element(By.LINK_TEXT, 'Login').click()
 username_input = driver.find_element(By.ID, 'username')
 password_input = driver.find_element(By.ID, 'password')
@@ -57,9 +57,22 @@ my_password = getpass.getpass(prompt='Enter your password: ')
 password_input.send_keys(my_password)
 driver.find_element(By.CSS_SELECTOR, 'input.btn.btn-primary').click()
 
-quotes = driver.find_elements(By.CLASS_NAME, 'text')
-authors = driver.find_elements(By.CLASS_NAME, 'author')
-for quote, author in zip(quotes, authors):
-    print(quote.text, author.text)
+# Open the CSV file for writing with UTF-8 encoding
+with open("scraped_quotes.csv", "w", newline="\n", encoding="utf-8") as file:
+    writer = csv.writer(file)
+    writer.writerow(['QUOTES Using Selenium', 'AUTHORS Using Selenium'])
+    while True:
+        quotes = driver.find_elements(By.CLASS_NAME, 'text')
+        authors = driver.find_elements(By.CLASS_NAME, 'author')
+
+        for quote, author in zip(quotes, authors):
+            print(quote.text, author.text)
+            writer.writerow([quote.text, author.text])
+        # Try to find and click the 'Next' button to go to the next page
+        try:
+            next_button = driver.find_element(By.PARTIAL_LINK_TEXT, 'Next')
+            next_button.click()
+        except NoSuchElementException:
+            break
 
 driver.quit()
