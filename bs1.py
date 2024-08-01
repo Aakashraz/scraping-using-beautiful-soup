@@ -7,12 +7,12 @@ def get_details(sites):
     response_details = requests.get(sites)
     contents_details = response_details.content
     soup_details = BeautifulSoup(contents_details, 'html.parser')
-    title = soup_details.find('h1').text
-    plot = soup_details.find('p', {"class": "plot"}).text
-    scripts = soup_details.find('div', {"class": "full-script"}).text
-    print(f"Title: {title}")
-    print(f"Plot: {plot} \n Transcripts: {scripts}\n\n")
-    return title, plot, scripts
+    title_details = soup_details.find('h1').text
+    plot_details = soup_details.find('p', {"class": "plot"}).text
+    scripts_details = soup_details.find('div', {"class": "full-script"}).text
+    print(f"Title: {title_details}")
+    print(f"Plot: {plot_details} \n Transcripts: {scripts_details}\n\n")
+    return title_details, plot_details, scripts_details
 
 
 base_url = 'https://subslikescript.com'
@@ -26,7 +26,7 @@ articles = main_page.findAll('article')
 # the below list of high_rated_series_links is for the last article only
 high_rated_series = articles[3].findAll('a', href=True)
 high_rated_series_links = [a['href'] for a in high_rated_series]
-# print(high_rated_series_links)
+print(f"High Rated Series: {high_rated_series_links}")
 # print(articles[3])
 
 links = []
@@ -45,37 +45,51 @@ for link in main_page.findAll('a', href=True):
     links.append(link['href'])
 # print(f"ALl Links: {links}")
 
-links_season = []
 
 with open('subsscripts.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(['Title', 'Plot', 'Transcripts'])
     for i in links[2:]:
+        links_season = []
+        # remember to reset the links_season[] array, for links in high_rated_series_links,
+        # otherwise it will append the data from the beginning again and again
         try:
             if i.startswith('/'):
-                url = base_url + i
-                # # if i.startswith('/movie'):
-                # # It works only for first three(3) articles only
-                title, plot, transcripts = get_details(url)
-                writer.writerow([title, plot, transcripts])
+                print(f"i:{i}")
+                if i not in high_rated_series_links:
+                    url = base_url + i
+                    # # if i.startswith('/movie'):
+                    # # It works only for first three(3) articles only
+                    title, plot, transcripts = get_details(url)
+                    writer.writerow([title, plot, transcripts])
+                    print(f"url:{url}\n not in high Rated Series: {i}")
 
-                if i in high_rated_series_links:
-                    print(f"i:{i}")
+                elif i in high_rated_series_links:
                     # to fetch all the div elements containing anchor tags of all seasons available on the page
-                    series_seasons = soup.find_all('div', class_='series_seasons')
+                    # after matching the url, it will open a new link by appending the links to base_url
+                    # then, it will fetch the data about the series (all seasons available there) from that opened link
+                    series_url = base_url + i
+                    res = requests.get(series_url)
+                    cont = res.content
+                    soup_series = BeautifulSoup(cont, 'html.parser')
+                    series_seasons = soup_series.find_all('div', class_='series_seasons')
                     # print(f"series_seasons {series_seasons}")
                     # to get all the href:links inside the anchor tags
                     for season in series_seasons:
                         anchors = season.find_all('a', href=True)
+                        # print(f"anchors: {anchors}")
+
                         # to add the accessed href links to the base URL
                         for anchor in anchors:
                             links_season.append(base_url + anchor['href'])
-                        # to get the details by running the loop inside each season
-                        for link in links_season:
-                            title, plot, transcripts = get_details(link)
-                            writer.writerow([title, plot, transcripts])
 
-            print(f"Seasons: {links_season}")
+                    print(f"total season episode: {len(links_season)} Seasons: {links_season}")
+
+                    # to get the details by running the loop inside each season
+                    for link in links_season:
+                        title, plot, transcripts = get_details(link)
+                        writer.writerow([title, plot, transcripts])
+                        print(f"link: {link}")
 
         except Exception as e:
             print(e)
