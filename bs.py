@@ -72,6 +72,7 @@ with open("scraped_quotes.csv", "w", newline="\n", encoding="utf-8") as file:
         try:
             next_button = driver.find_element(By.PARTIAL_LINK_TEXT, 'Next')
             next_button.click()
+        # break the loop after no Next button to click
         except NoSuchElementException:
             break
 
