@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
 import time
 import pandas as pd
 
@@ -7,10 +8,22 @@ driver = webdriver.Chrome()
 url = 'https://www.adamchoi.co.uk/overs/detailed'
 driver.get(url)
 
+# to click on All matches
 all_matches_button = driver.find_element(By.XPATH, '//label[@analytics-event="All matches"]')
 all_matches_button.click()
 
-time.sleep(2)
+# to select from the dropdown options
+dropdown_element = driver.find_element(By.ID, 'country')
+dropdown = Select(dropdown_element)
+
+# this is to wait for some time to load the page
+time.sleep(3)
+
+# while using select_by_visible_text, there should be exact match with the available options
+dropdown.select_by_visible_text('Spain')
+
+# this select the 5th options available, as indexing start from 0.
+# dropdown.select_by_index(4)
 
 matches = driver.find_elements(By.TAG_NAME, 'tr')
 match_day = []
