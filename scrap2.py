@@ -11,22 +11,25 @@ wait = WebDriverWait(driver, 20)
 # driver.maximize_window()
 
 # for the container
-container = wait.until(EC.presence_of_element_located((By.XPATH, '//div[contains(@class, "adbl-impression-container")]')))
+container = wait.until(
+    EC.presence_of_element_located((By.XPATH, '//div[contains(@class, "adbl-impression-container")]'))
+)
 # find all product elements
 products = container.find_elements(By.XPATH, './/li')
 
 for product in products:
     try:
-        runtime_element = WebDriverWait(product, 10).until(
+        runtime_element = WebDriverWait(product, 5).until(
             EC.presence_of_element_located((By.XPATH, './/li[contains(@class, "runtimeLabel")]'))
         )
         print(f"runtime: {runtime_element.text}")
 
-        title_element = WebDriverWait(product, 10).until(
+        title_element = WebDriverWait(product, 5).until(
             EC.presence_of_element_located((By.XPATH, './/h3[contains(@class, "bc-heading")]'))
         )
         print(f"Title: {title_element.text}")
         print("----------------------")
+
     except TimeoutError:
         print("Couldn't find in the product")
     except Exception as e:
