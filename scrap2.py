@@ -2,9 +2,15 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+from selenium.webdriver.chrome.options import Options
 import time
 
-driver = webdriver.Chrome()
+option = Options
+option.headless = True
+option.add_argument('window-size=1920x1080')
+
+driver = webdriver.Chrome(options=option)
 url = 'https://www.audible.com/search'
 driver.get(url)
 wait = WebDriverWait(driver, 20)
@@ -16,6 +22,8 @@ container = wait.until(
 )
 # find all product elements
 products = container.find_elements(By.XPATH, './/li')
+# book_title = []
+# book_runtime = []
 
 for product in products:
     try:
@@ -28,6 +36,9 @@ for product in products:
             EC.presence_of_element_located((By.XPATH, './/h3[contains(@class, "bc-heading")]'))
         )
         print(f"Title: {title_element.text}")
+
+        # book_title.append(product.find_element(By.XPATH, './/h3[contains(@class, "bc-heading")]').text)
+        # book_runtime.append(product.find_element(By.XPATH, './/li[contains(@class, "runtimeLabel")]').text)
         print("----------------------")
 
     except TimeoutError:
