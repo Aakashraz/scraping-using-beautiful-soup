@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -73,16 +74,26 @@ while current_page <= last_page:
             book_release_date.append(release_element.text)
             print("----------------------")
 
-            current_page = current_page + 1
-            next_page_button = pagination.find_element(By.XPATH, './/span[contains(@class, "nextButton")]')
-            next_page_button.click()
-
-        except TimeoutError:
+        except TimeoutException:
             print("Couldn't find in the product")
         except Exception as e:
             print(f"AN ERROR OCCURRED: {e}")
 
-    driver.quit()
+    current_page = current_page + 1
+    # this try except, block is used again to avoid the error:
+    # Error Encountered:
+    # The script crashed with a StaleElementReferenceException
+    # when trying to find the next button to navigate to the third page.
+    try:
+        next_button = WebDriverWait(driver, 15).until(
+            EC.element_to_be_clickable((By.XPATH, '//span[contains(@class, "nextButton")]'))
+        )
+        # next_page_button = driver.find_element(By.XPATH, '//span[contains(@class, "nextButton")]')
+        next_button.click()
+    except TimeoutException:
+        print("Couldn't find the next page")
+
+driver.quit()
 
 df = pd.DataFrame(
     {'Title': book_title, 'Author': book_author, 'Length': book_runtime, 'ReleaseDate': book_release_date, '': "\n-------------------------------------\n"})
