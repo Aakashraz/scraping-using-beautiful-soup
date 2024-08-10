@@ -20,15 +20,31 @@ driver.get(url)
 driver.maximize_window()
 
 wait = WebDriverWait(driver, 20)
-login = wait.until(
-    EC.element_to_be_clickable((By.XPATH, '//a[@data-testid = "loginButton"]'))
-)
-login.click()
-time.sleep(2)
 
-login_box = driver.find_element(By.XPATH, '//div[contains(@class, "css-175oi2r r-ywje51 r-nllxps r-jxj0sb r-1fkl15p r-16wqof")]')
-user = WebDriverWait(login_box, 10).until(
-    EC.presence_of_element_located((By.XPATH, './/input[@name = "text"]'))
-)
-user.send_keys(username)
+try:
+    login = wait.until(
+        EC.element_to_be_clickable((By.XPATH, '//a[@data-testid = "loginButton"]'))
+    )
+    login.click()
+    time.sleep(2)
+except:
+    print('Login failed')
+
+    try:
+        time.sleep(5)
+        login_box = WebDriverWait(driver, 20).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, "div.css-175oi2r.r-ywje51.r-nllxps.r-jxj0sb.r-1fkl15p.r-16wqof"))
+        )
+        user = WebDriverWait(login_box, 10).until(
+            EC.presence_of_element_located((By.XPATH, './/input[@name="text"]'))
+        )
+        # user = login_box.find_element(By.XPATH, './/input[@name="username"]')
+        user.send_keys(username)
+        next_button = login_box.find_element(By.XPATH, './/button[@class = "css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-ywje51 r-184id4b r-13qz1uu r-2yi16 r-1qi8awa r-3pj75a r-1loqt21 r-o7ynqc r-6416eg r-1ny4l3l"]')
+        next_button.click()
+
+    except Exception as e:
+        print(e)
+
+
 driver.quit()
