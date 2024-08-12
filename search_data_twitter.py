@@ -9,3 +9,7 @@ driver = webdriver.Chrome(options=chrome_options)
 url = 'https://x.com/search?q=olympics&src=typed_query&f=top'
 driver.get(url)
 
+tweets = driver.find_elements(By.XPATH, '//div[contains(@aria-label,"Timeline: Search")]')
+
+for tweet in tweets:
+    print(tweet)

@@ -17,10 +17,11 @@ print(type(username), username, password)
 
 chrome_options = Options()
 chrome_options.add_argument("--window-size=1920x1080")
+chrome_options.add_argument("--start-maximized")
 driver = webdriver.Chrome(options=chrome_options)
 url = 'https://twitter.com/'
 driver.get(url)
-driver.maximize_window()
+# driver.maximize_window()
 
 wait = WebDriverWait(driver, 20)
 
@@ -51,12 +52,30 @@ try:
     time.sleep(1)
     next_button.click()
     print("Next button clicked...")
+    time.sleep(2)
+
+    password_input = driver.find_element(By.XPATH, '//input[@name= "password"]')
+    password_input.send_keys(password)
+    time.sleep(2)
+
+    login_button = driver.find_element(By.XPATH, '//button[@data-testid="LoginForm_Login_Button"]')
+    login_button.click()
+    time.sleep(5)
+    print('Login Successful')
 
     # this input is used to bypass the twitter captcha/authentication.
-    input("Press Enter after completing the authentication...")
-
+    # input("Press Enter after completing the authentication...")
 
 except Exception as e:
     print(e)
+
+# ------------------------------------------ QUERY SEARCH DATA -------------------------------------
+
+try:
+    url_query = 'https://x.com/search?q=python&src=typed_query'
+    driver.get(url_query)
+    time.sleep(5)
+except:
+    pass
 
 driver.quit()
