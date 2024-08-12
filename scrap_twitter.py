@@ -7,6 +7,7 @@ from selenium.webdriver.chrome.options import Options
 import time
 import os
 from dotenv import load_dotenv
+import pandas as pd
 
 load_dotenv(override=True)  # override the value in the .env file
 
@@ -75,7 +76,25 @@ try:
     url_query = 'https://x.com/search?q=python&src=typed_query'
     driver.get(url_query)
     time.sleep(5)
+    # timeline_box = driver.find_element(By.XPATH, '//div[contains(@aria-label,"Timeline: Search")]')
+    tweets = driver.find_elements(By.XPATH, '//div[@data-testid="cellInnerDiv"]')
+
+    user_id_data = []
+    # tweet_text = []
+    for tweet in tweets:
+        # if tweet.text != '' or tweet.text != 'View all' or tweet.text == 'Discover more':
+        user_id = tweet.find_element(By.XPATH, './/span[contains(text(), "@")]').text
+        # check whether the span element exists or not for all the tweet
+        print(f"userID: {user_id}")
+        # tweet_text = tweet.find_element()
+        # print("-----------------------------\n")
+        # user_id_data.append(user_id)
+
+    print(f"IDs: {user_id_data}")
+
 except:
     pass
 
 driver.quit()
+
+# pd.DataFrame({'user': user_id_data})
