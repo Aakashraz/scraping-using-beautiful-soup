@@ -29,26 +29,26 @@ url = 'https://twitter.com/'
 
 # ----------------------------------    SIGN IN ------------------------------------
 
-def login_twitter(driver, username, password, max_retries=3, delay=5):
+def login_twitter(dr, user, key, max_retries=3, delay=5):
     for attempt in range(max_retries):
-        driver.get(url)
+        dr.get(url)
 
         try:
             login = wait.until(
                 EC.element_to_be_clickable((By.XPATH, '//a[@data-testid = "loginButton"]'))
             )
             login.click()
-            time.sleep(3)
+            time.sleep(2)
         except:
             print('Login failed')
 
         try:
-            login_box = WebDriverWait(driver, 10).until(
+            login_box = WebDriverWait(dr, 10).until(
                 EC.visibility_of_element_located(
                     (By.CSS_SELECTOR, "div.css-175oi2r.r-ywje51.r-nllxps.r-jxj0sb.r-1fkl15p.r-16wqof"))
             )
             user_input = login_box.find_element(By.XPATH, './/input[@name="text"]')
-            user_input.send_keys(username)
+            user_input.send_keys(user)
             # time.sleep(2)
             print('Username successful')
             next_button = WebDriverWait(login_box, 10).until(
@@ -59,13 +59,13 @@ def login_twitter(driver, username, password, max_retries=3, delay=5):
             time.sleep(1)
             next_button.click()
             print("Next button clicked...")
+            time.sleep(3)
+
+            password_input = dr.find_element(By.XPATH, '//input[@name= "password"]')
+            password_input.send_keys(key)
             time.sleep(2)
 
-            password_input = driver.find_element(By.XPATH, '//input[@name= "password"]')
-            password_input.send_keys(password)
-            time.sleep(2)
-
-            login_button = driver.find_element(By.XPATH, '//button[@data-testid="LoginForm_Login_Button"]')
+            login_button = dr.find_element(By.XPATH, '//button[@data-testid="LoginForm_Login_Button"]')
             login_button.click()
             time.sleep(5)
             print('Login Successful')
