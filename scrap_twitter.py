@@ -61,7 +61,13 @@ def login_twitter(dr, user, key, max_retries=3, delay=5):
             print("Next button clicked...")
             time.sleep(3)
 
-            password_input = dr.find_element(By.XPATH, '//input[@name= "password"]')
+            # Pause for manual authentication after entering username
+            input("Please complete any authentication steps if required, "
+                  "then press enter to continue...")
+
+            password_input = WebDriverWait(dr, 10).until(
+                EC.visibility_of_element_located((By.XPATH, '//input[@name= "password"]'))
+            )
             password_input.send_keys(key)
             time.sleep(2)
 
@@ -95,14 +101,14 @@ if login_twitter(driver, username, password):
             EC.presence_of_element_located((By.XPATH, '//div[contains(@aria-label,"Timeline: Search")]'))
         )
         print(f"Timeline found: {timeline_box}\n\n")
-        # tweets = WebDriverWait(timeline_box, 20).until(
-        #     EC.visibility_of_all_elements_located((By.XPATH, './/div[@data-testid="cellInnerDiv"]'))
-        # )
-        # print(f"Tweets found: {tweets.text}\n\n")
+        tweets = WebDriverWait(timeline_box, 20).until(
+            EC.presence_of_all_elements_located((By.XPATH, './/div[@data-testid="cellInnerDiv"]'))
+        )
+        print(f"Tweets found: {tweets.text}\n\n")
 
         user_id_data = []
         # tweet_text = []
-        for tweet in timeline_box:
+        for tweet in tweets:
             # if tweet.text != '' or tweet.text != 'View all' or tweet.text == 'Discover more':
             user_id = tweet.find_element(By.XPATH, './/span[contains(text(), "@")]').text
             # check whether the span element exists or not for all the tweet
