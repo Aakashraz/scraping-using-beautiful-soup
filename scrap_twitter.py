@@ -67,7 +67,7 @@ def login_twitter(dr, user, key, max_retries=3, delay=5):
 
             login_button = dr.find_element(By.XPATH, '//button[@data-testid="LoginForm_Login_Button"]')
             login_button.click()
-            time.sleep(5)
+            time.sleep(10)
             print('Login Successful')
             return True
 
@@ -90,13 +90,19 @@ if login_twitter(driver, username, password):
     try:
         url_query = 'https://x.com/search?q=python&src=typed_query'
         driver.get(url_query)
-        time.sleep(5)
-        # timeline_box = driver.find_element(By.XPATH, '//div[contains(@aria-label,"Timeline: Search")]')
-        tweets = driver.find_elements(By.XPATH, '//div[@data-testid="cellInnerDiv"]')
+        time.sleep(3)
+        timeline_box = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, '//div[contains(@aria-label,"Timeline: Search")]'))
+        )
+        print(f"Timeline found: {timeline_box}\n\n")
+        # tweets = WebDriverWait(timeline_box, 20).until(
+        #     EC.visibility_of_all_elements_located((By.XPATH, './/div[@data-testid="cellInnerDiv"]'))
+        # )
+        # print(f"Tweets found: {tweets.text}\n\n")
 
         user_id_data = []
         # tweet_text = []
-        for tweet in tweets:
+        for tweet in timeline_box:
             # if tweet.text != '' or tweet.text != 'View all' or tweet.text == 'Discover more':
             user_id = tweet.find_element(By.XPATH, './/span[contains(text(), "@")]').text
             # check whether the span element exists or not for all the tweet
