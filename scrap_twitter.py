@@ -92,14 +92,14 @@ def login_twitter(dr, user, key, max_retries=3, delay=5):
 
 # ------------------------------------------ QUERY SEARCH DATA -------------------------------------
 
+user_id_data = []
+tweet_text_data = []
+
 if login_twitter(driver, username, password):
     try:
         url_query = 'https://x.com/search?q=python&src=typed_query'
         driver.get(url_query)
         time.sleep(3)
-        # timeline_box = WebDriverWait(driver, 30).until(
-        #     EC.presence_of_element_located((By.XPATH, '//div[contains(@aria-label,"Timeline: Search")]'))
-        # )
 
         # Save a screenshot
         driver.save_screenshot('twitter_search_page.png')
@@ -107,24 +107,23 @@ if login_twitter(driver, username, password):
         # print("Page Source:")
         # print(driver.page_source)
 
-        # print(f"Timeline found: {timeline_box}\n\n")
-
         tweets = WebDriverWait(driver, 30).until(
             EC.visibility_of_all_elements_located((By.XPATH, '//article[@data-testid="tweet"]'))
         )
-        # print(f"Tweets found: {tweets.text}\n\n")
+        print(f"Tweets found: {tweets}\n\n")
 
-        user_id_data = []
-        tweet_text_data = []
         for tweet in tweets:
             # if tweet.text != '' or tweet.text != 'View all' or tweet.text == 'Discover more':
             user_id = tweet.find_element(By.XPATH, './/span[starts-with(text(), "@")]').text
             tweet_text = tweet.find_element(By.XPATH, './/div[@data-testid="tweetText"]').text
+
+            # to accommodate the tweet text in a single line in the csv file
+            tweet_text = " ".join(tweet_text.split())
             # check whether the span element exists or not for all the tweet
             print(f"userID: {user_id}")
             print(f"tweetText:{tweet_text}")
-
             print("-----------------------------\n")
+
             user_id_data.append(user_id)
             tweet_text_data.append(tweet_text)
 
@@ -142,4 +141,5 @@ else:
 
 driver.quit()
 
-# pd.DataFrame({'user': user_id_data})
+df_tweets = pd.DataFrame({'user': user_id_data, 'Text': tweet_text_data})
+df_tweets.to_csv('tweets.csv', index=False)
