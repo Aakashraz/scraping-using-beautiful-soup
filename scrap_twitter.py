@@ -63,7 +63,7 @@ def login_twitter(dr, user, key, max_retries=3, delay=5):
 
             # Pause for manual authentication after entering username
             input("Please complete any authentication steps if required, "
-                  "then press enter to continue...")
+                  "then press enter to continue...\n")
 
             password_input = WebDriverWait(dr, 10).until(
                 EC.visibility_of_element_located((By.XPATH, '//input[@name= "password"]'))
@@ -97,30 +97,43 @@ if login_twitter(driver, username, password):
         url_query = 'https://x.com/search?q=python&src=typed_query'
         driver.get(url_query)
         time.sleep(3)
-        timeline_box = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.XPATH, '//div[contains(@aria-label,"Timeline: Search")]'))
+        # timeline_box = WebDriverWait(driver, 30).until(
+        #     EC.presence_of_element_located((By.XPATH, '//div[contains(@aria-label,"Timeline: Search")]'))
+        # )
+
+        # Save a screenshot
+        driver.save_screenshot('twitter_search_page.png')
+        # Print the page source
+        # print("Page Source:")
+        # print(driver.page_source)
+
+        # print(f"Timeline found: {timeline_box}\n\n")
+
+        tweets = WebDriverWait(driver, 30).until(
+            EC.visibility_of_all_elements_located((By.XPATH, '//article[@data-testid="tweet"]'))
         )
-        print(f"Timeline found: {timeline_box}\n\n")
-        tweets = WebDriverWait(timeline_box, 20).until(
-            EC.presence_of_all_elements_located((By.XPATH, './/div[@data-testid="cellInnerDiv"]'))
-        )
-        print(f"Tweets found: {tweets.text}\n\n")
+        # print(f"Tweets found: {tweets.text}\n\n")
 
         user_id_data = []
-        # tweet_text = []
+        tweet_text_data = []
         for tweet in tweets:
             # if tweet.text != '' or tweet.text != 'View all' or tweet.text == 'Discover more':
-            user_id = tweet.find_element(By.XPATH, './/span[contains(text(), "@")]').text
+            user_id = tweet.find_element(By.XPATH, './/span[starts-with(text(), "@")]').text
+            tweet_text = tweet.find_element(By.XPATH, './/div[@data-testid="tweetText"]').text
             # check whether the span element exists or not for all the tweet
             print(f"userID: {user_id}")
-            # tweet_text = tweet.find_element()
-            # print("-----------------------------\n")
-            # user_id_data.append(user_id)
+            print(f"tweetText:{tweet_text}")
+
+            print("-----------------------------\n")
+            user_id_data.append(user_id)
+            tweet_text_data.append(tweet_text)
 
         print(f"IDs: {user_id_data}")
+        print(f"Text: {tweet_text_data}")
 
-    except:
-        pass
+    except (TimeoutException, NoSuchElementException) as e:
+        print(f"Error: {str(e)}")
+
 
 else:
     print('Unable to log in to Twitter (may be due to twitter authentication rule),'
