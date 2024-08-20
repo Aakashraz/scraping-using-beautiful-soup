@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.webdriver.common.keys import Keys
 
 import time
 import os
@@ -81,13 +82,51 @@ def login_twitter(dr, user, key, max_retries=3, delay=5):
             # input("Press Enter after completing the authentication...")
 
         except (TimeoutException, NoSuchElementException) as e:
-            print(f"Login attempt {attempt +1} failed: {str(e)}")
-            if attempt < max_retries-1:
+            print(f"Login attempt {attempt + 1} failed: {str(e)}")
+            if attempt < max_retries - 1:
                 print(f"Retrying in {delay} seconds...")
                 time.sleep(delay)
             else:
                 print("Max retries reached. Login failed")
                 return False
+
+
+# Limited Scrolling pages to bottom
+def scroll_page(dr, num_scrolls=20, delay=3):
+    body = WebDriverWait(dr, 10).until(
+        EC.visibility_of_element_located((By.TAG_NAME, 'body'))
+    )
+    for _ in range(num_scrolls):
+        body.send_keys(Keys.PAGE_DOWN)
+        time.sleep(delay)
+
+
+# Unlimited Scrolling pages to bottom
+def infinite_scroll(dr, delay=3):
+    last_height = dr.execute_script("return document.body.scrollHeight")
+
+    while True:
+        body = WebDriverWait(dr, 10).until(
+            EC.visibility_of_element_located((By.TAG_NAME, 'body'))
+        )
+        # wait for page to load
+        time.sleep(delay)
+        body.send_keys(Keys.PAGE_DOWN)
+        # wait again for page to load after scrolling
+        time.sleep(delay)
+
+        # calculate the new scroll height and compare with last scroll height
+        new_height = dr.execute_script("return document.body.scrollHeight")
+
+        if new_height == last_height:
+            break
+
+        last_height = new_height
+        # Breaking the Loop:
+        #     If new_height equals last_height, the loop breaks,
+        #     meaning the script stops scrolling because it has reached the bottom of the page.
+        #     If new_height is greater than last_height, it means the page still has more content
+        #     to load, so the script continues scrolling.
 
 
 # ------------------------------------------ QUERY SEARCH DATA -------------------------------------
@@ -107,10 +146,17 @@ if login_twitter(driver, username, password):
         # print("Page Source:")
         # print(driver.page_source)
 
+        # to scroll about 10 page below
+        # scroll_page(driver)
+
+        # to scroll page to bottom
+        infinite_scroll(driver)
+
         tweets = WebDriverWait(driver, 30).until(
             EC.visibility_of_all_elements_located((By.XPATH, '//article[@data-testid="tweet"]'))
         )
-        print(f"Tweets found: {tweets}\n\n")
+        print(f"Tweets found: {tweets}\n"
+              f"No. of tweets found after scrolling: {len(tweets)}\n")
 
         for tweet in tweets:
             # if tweet.text != '' or tweet.text != 'View all' or tweet.text == 'Discover more':
@@ -137,7 +183,6 @@ if login_twitter(driver, username, password):
 else:
     print('Unable to log in to Twitter (may be due to twitter authentication rule),'
           'either please check your credentials or try again later')
-
 
 driver.quit()
 
