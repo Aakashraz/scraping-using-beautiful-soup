@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.webdriver.common.keys import Keys
 
 import time
 import os
@@ -63,7 +64,7 @@ def login_twitter(dr, user, key, max_retries=3, delay=5):
 
             # Pause for manual authentication after entering username
             input("Please complete any authentication steps if required, "
-                  "then press enter to continue...")
+                  "then press enter to continue...\n")
 
             password_input = WebDriverWait(dr, 10).until(
                 EC.visibility_of_element_located((By.XPATH, '//input[@name= "password"]'))
@@ -81,8 +82,8 @@ def login_twitter(dr, user, key, max_retries=3, delay=5):
             # input("Press Enter after completing the authentication...")
 
         except (TimeoutException, NoSuchElementException) as e:
-            print(f"Login attempt {attempt +1} failed: {str(e)}")
-            if attempt < max_retries-1:
+            print(f"Login attempt {attempt + 1} failed: {str(e)}")
+            if attempt < max_retries - 1:
                 print(f"Retrying in {delay} seconds...")
                 time.sleep(delay)
             else:
@@ -90,43 +91,100 @@ def login_twitter(dr, user, key, max_retries=3, delay=5):
                 return False
 
 
+# Limited Scrolling pages to bottom
+def scroll_page(dr, num_scrolls=20, delay=3):
+    body = WebDriverWait(dr, 10).until(
+        EC.visibility_of_element_located((By.TAG_NAME, 'body'))
+    )
+    for _ in range(num_scrolls):
+        body.send_keys(Keys.PAGE_DOWN)
+        time.sleep(delay)
+
+
+# Unlimited Scrolling pages to bottom
+def infinite_scroll(dr, delay=3):
+    last_height = dr.execute_script("return document.body.scrollHeight")
+
+    while True:
+        body = WebDriverWait(dr, 10).until(
+            EC.visibility_of_element_located((By.TAG_NAME, 'body'))
+        )
+        # wait for page to load
+        time.sleep(delay)
+        body.send_keys(Keys.PAGE_DOWN)
+        # wait again for page to load after scrolling
+        time.sleep(delay)
+
+        # calculate the new scroll height and compare with last scroll height
+        new_height = dr.execute_script("return document.body.scrollHeight")
+
+        if new_height == last_height:
+            break
+
+        last_height = new_height
+        # Breaking the Loop:
+        #     If new_height equals last_height, the loop breaks,
+        #     meaning the script stops scrolling because it has reached the bottom of the page.
+        #     If new_height is greater than last_height, it means the page still has more content
+        #     to load, so the script continues scrolling.
+
+
 # ------------------------------------------ QUERY SEARCH DATA -------------------------------------
+
+user_id_data = []
+tweet_text_data = []
 
 if login_twitter(driver, username, password):
     try:
         url_query = 'https://x.com/search?q=python&src=typed_query'
         driver.get(url_query)
         time.sleep(3)
-        timeline_box = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.XPATH, '//div[contains(@aria-label,"Timeline: Search")]'))
-        )
-        print(f"Timeline found: {timeline_box}\n\n")
-        tweets = WebDriverWait(timeline_box, 20).until(
-            EC.presence_of_all_elements_located((By.XPATH, './/div[@data-testid="cellInnerDiv"]'))
-        )
-        print(f"Tweets found: {tweets.text}\n\n")
 
-        user_id_data = []
-        # tweet_text = []
+        # Save a screenshot
+        driver.save_screenshot('twitter_search_page.png')
+        # Print the page source
+        # print("Page Source:")
+        # print(driver.page_source)
+
+        # to scroll about 10 page below
+        # scroll_page(driver)
+
+        # to scroll page to bottom
+        infinite_scroll(driver)
+
+        tweets = WebDriverWait(driver, 30).until(
+            EC.visibility_of_all_elements_located((By.XPATH, '//article[@data-testid="tweet"]'))
+        )
+        print(f"Tweets found: {tweets}\n"
+              f"No. of tweets found after scrolling: {len(tweets)}\n")
+
         for tweet in tweets:
             # if tweet.text != '' or tweet.text != 'View all' or tweet.text == 'Discover more':
-            user_id = tweet.find_element(By.XPATH, './/span[contains(text(), "@")]').text
+            user_id = tweet.find_element(By.XPATH, './/span[starts-with(text(), "@")]').text
+            tweet_text = tweet.find_element(By.XPATH, './/div[@data-testid="tweetText"]').text
+
+            # to accommodate the tweet text in a single line in the csv file
+            tweet_text = " ".join(tweet_text.split())
             # check whether the span element exists or not for all the tweet
             print(f"userID: {user_id}")
-            # tweet_text = tweet.find_element()
-            # print("-----------------------------\n")
-            # user_id_data.append(user_id)
+            print(f"tweetText:{tweet_text}")
+            print("-----------------------------\n")
+
+            user_id_data.append(user_id)
+            tweet_text_data.append(tweet_text)
 
         print(f"IDs: {user_id_data}")
+        print(f"Text: {tweet_text_data}")
 
-    except:
-        pass
+    except (TimeoutException, NoSuchElementException) as e:
+        print(f"Error: {str(e)}")
+
 
 else:
     print('Unable to log in to Twitter (may be due to twitter authentication rule),'
           'either please check your credentials or try again later')
 
-
 driver.quit()
 
-# pd.DataFrame({'user': user_id_data})
+df_tweets = pd.DataFrame({'user': user_id_data, 'Text': tweet_text_data})
+df_tweets.to_csv('tweets.csv', index=False)
