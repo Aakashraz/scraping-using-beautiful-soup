@@ -101,10 +101,9 @@ def scroll_page(dr, num_scrolls=20, delay=3):
         time.sleep(delay)
 
 
-# Unlimited Scrolling pages to bottom
-def infinite_scroll(dr, delay=3):
+# Unlimited Scrolling pages to bottom using the Scroll Height which is not efficient
+def infinite_scroll(dr, delay=2):
     last_height = dr.execute_script("return document.body.scrollHeight")
-
     while True:
         body = WebDriverWait(dr, 10).until(
             EC.visibility_of_element_located((By.TAG_NAME, 'body'))
@@ -129,6 +128,32 @@ def infinite_scroll(dr, delay=3):
         #     to load, so the script continues scrolling.
 
 
+# trying infinite scrolling using the no of elements loaded
+def infinite_scroll_using_elements(dr, delay=5, max_elements=1000):
+    # Get the initial number of article elements on the page
+    initial_divs = len(dr.find_elements(By.TAG_NAME, 'div'))
+    print(f"Initial number of div elements: {initial_divs}")
+    # Scroll the page to the bottom
+    dr.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+    time.sleep(delay)
+    # keep scrolling until the no. of elements stops increasing
+    element_count = initial_divs
+    while element_count < max_elements:
+        # scroll down and wait for the page to load
+        body = WebDriverWait(dr, 10).until(
+            EC.visibility_of_element_located((By.TAG_NAME, 'body'))
+        )
+        body.send_keys(Keys.PAGE_DOWN)
+        time.sleep(delay)
+        new_divs = len(dr.find_elements(By.TAG_NAME, 'div'))
+
+        # Check if the number of articles has stopped increasing
+        if new_divs <= initial_divs:
+            break
+        # Update the initial article count
+        element_count = new_divs
+
+
 # ------------------------------------------ QUERY SEARCH DATA -------------------------------------
 
 user_id_data = []
@@ -136,7 +161,7 @@ tweet_text_data = []
 
 if login_twitter(driver, username, password):
     try:
-        url_query = 'https://x.com/search?q=python&src=typed_query'
+        url_query = 'https://x.com/hashtag/python?src=hashtag_click'
         driver.get(url_query)
         time.sleep(3)
 
@@ -146,11 +171,11 @@ if login_twitter(driver, username, password):
         # print("Page Source:")
         # print(driver.page_source)
 
-        # to scroll about 10 page below
+        # to scroll about 20 page below
         # scroll_page(driver)
 
         # to scroll page to bottom
-        infinite_scroll(driver)
+        infinite_scroll_using_elements(driver)
 
         tweets = WebDriverWait(driver, 30).until(
             EC.visibility_of_all_elements_located((By.XPATH, '//article[@data-testid="tweet"]'))
@@ -174,7 +199,7 @@ if login_twitter(driver, username, password):
             tweet_text_data.append(tweet_text)
 
         print(f"IDs: {user_id_data}")
-        print(f"Text: {tweet_text_data}")
+        # print(f"Text: {tweet_text_data}")
 
     except (TimeoutException, NoSuchElementException) as e:
         print(f"Error: {str(e)}")
