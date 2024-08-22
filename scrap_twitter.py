@@ -129,7 +129,7 @@ def infinite_scroll(dr, delay=2):
 
 
 # trying infinite scrolling using the no of elements loaded
-def infinite_scroll_using_elements(dr, timeout=30, max_elements=20, delay=3):
+def infinite_scroll_using_elements(dr, scroll, counter, max_elements=20, delay=3):
     # Get the initial number of article elements on the page
     initial_divs = len(dr.find_elements(By.TAG_NAME, 'article'))
     print(f"Initial number of article elements: {initial_divs}")
@@ -138,14 +138,15 @@ def infinite_scroll_using_elements(dr, timeout=30, max_elements=20, delay=3):
     time.sleep(delay)
     # keep scrolling until the no. of elements stops increasing
     element_count = initial_divs
-    count = 0
+
     while element_count < max_elements:
         # to break the loop
-        if count >= 25:
-            print(f'Counter limit ({count}) reached for scrolling...........')
+        if counter >= 25:
+            print(f'Counter limit ({counter}) reached for scrolling...........')
+            scroll = False
             break
         # scroll down and wait for the page to load
-        body = WebDriverWait(dr, timeout).until(
+        body = WebDriverWait(dr, 30).until(
             EC.visibility_of_element_located((By.TAG_NAME, 'body'))
         )
         body.send_keys(Keys.PAGE_DOWN)
@@ -171,20 +172,20 @@ def infinite_scroll_using_elements(dr, timeout=30, max_elements=20, delay=3):
         element_count = new_divs
         print(f' element count after: {element_count}')
 
-        count += 1
-        print(f"counter: {count}")
-
-    return dr
+        print(f"counter inside infinite_scroll: {counter}")
+        return dr, scroll
 
 
 # ------------------------------------------ QUERY SEARCH DATA -------------------------------------
 
 user_id_data = []
 tweet_text_data = []
+all_tweets = set()
 
 if login_twitter(driver, username, password):
     try:
-        url_query = 'https://x.com/hashtag/python?src=hashtag_click'
+        # url_query = 'https://x.com/hashtag/python?src=hashtag_click'
+        url_query = 'https://x.com/search?q=%23Messi&src=recent_search_click'
         driver.get(url_query)
         time.sleep(3)
 
@@ -197,33 +198,43 @@ if login_twitter(driver, username, password):
         # to scroll about 20 page below
         # scroll_page(driver)
 
-        # to scroll page to bottom
-        driver1 = infinite_scroll_using_elements(driver)
+        count = 0
+        scrolling = True
+        while scrolling:
+            # to scroll page to bottom
+            driver1, scrolling = infinite_scroll_using_elements(driver, scrolling, count)
+            count += 1
 
-        # After ending the scrolling, now from here we will scrap the tweets
-        tweets = WebDriverWait(driver1, 60).until(
-            EC.visibility_of_all_elements_located((By.XPATH, '//article[@data-testid="tweet"]'))
-        )
-        print(f"Tweets found: {tweets}\n"
-              f"No. of tweets found after scrolling: {len(tweets)}\n")
+            # After ending the scrolling, now from here we will scrap the tweets
+            tweets = WebDriverWait(driver1, 30).until(
+                EC.presence_of_all_elements_located((By.XPATH, '//article[@data-testid="tweet"]'))
+            )
+            print(f"Tweets found: {tweets}\n"
+                  f"No. of tweets found after scrolling: {len(tweets)}\n")
 
-        for tweet in tweets:
-            # if tweet.text != '' or tweet.text != 'View all' or tweet.text == 'Discover more':
-            user_id = tweet.find_element(By.XPATH, './/span[starts-with(text(), "@")]').text
-            tweet_text = tweet.find_element(By.XPATH, './/div[@data-testid="tweetText"]').text
+            for tweet in tweets:
+                # if tweet.text != '' or tweet.text != 'View all' or tweet.text == 'Discover more':
+                user_id = tweet.find_element(By.XPATH, './/span[starts-with(text(), "@")]').text
+                tweet_text = tweet.find_element(By.XPATH, './/div[@data-testid="tweetText"]').text
 
-            # to accommodate the tweet text in a single line in the csv file
-            tweet_text = " ".join(tweet_text.split())
-            # check whether the span element exists or not for all the tweet
-            print(f"userID: {user_id}")
-            print(f"tweetText:{tweet_text}")
-            print("-----------------------------\n")
+                # this is for unique tweet identifier, to avoid repeated tweets
+                unique_tweet_id = tweet.get_attribute("aria-labelledby")
+                # check if the unique_id is already in the set()
+                if unique_tweet_id not in all_tweets:
+                    all_tweets.add(unique_tweet_id)
 
-            user_id_data.append(user_id)
-            tweet_text_data.append(tweet_text)
+                    # to accommodate the tweet text in a single line in the csv file
+                    tweet_text = " ".join(tweet_text.split())
+                    # check whether the span element exists or not for all the tweet
+                    print(f"userID: {user_id}")
+                    print(f"tweetText:{tweet_text}")
+                    print("-----------------------------\n")
 
-        print(f"IDs: {user_id_data}")
-        # print(f"Text: {tweet_text_data}")
+                    user_id_data.append(user_id)
+                    tweet_text_data.append(tweet_text)
+
+                print(f"IDs: {user_id_data}\n\n")
+                # print(f"Text: {tweet_text_data}")
 
     except (TimeoutException, NoSuchElementException) as e:
         print(f"Error: {str(e)}")
