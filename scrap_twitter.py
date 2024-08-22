@@ -129,29 +129,52 @@ def infinite_scroll(dr, delay=2):
 
 
 # trying infinite scrolling using the no of elements loaded
-def infinite_scroll_using_elements(dr, delay=5, max_elements=1000):
+def infinite_scroll_using_elements(dr, timeout=30, max_elements=20, delay=3):
     # Get the initial number of article elements on the page
-    initial_divs = len(dr.find_elements(By.TAG_NAME, 'div'))
-    print(f"Initial number of div elements: {initial_divs}")
+    initial_divs = len(dr.find_elements(By.TAG_NAME, 'article'))
+    print(f"Initial number of article elements: {initial_divs}")
     # Scroll the page to the bottom
     dr.execute_script("window.scrollTo(0,document.body.scrollHeight);")
     time.sleep(delay)
     # keep scrolling until the no. of elements stops increasing
     element_count = initial_divs
+    count = 0
     while element_count < max_elements:
+        # to break the loop
+        if count >= 25:
+            print(f'Counter limit ({count}) reached for scrolling...........')
+            break
         # scroll down and wait for the page to load
-        body = WebDriverWait(dr, 10).until(
+        body = WebDriverWait(dr, timeout).until(
             EC.visibility_of_element_located((By.TAG_NAME, 'body'))
         )
         body.send_keys(Keys.PAGE_DOWN)
         time.sleep(delay)
-        new_divs = len(dr.find_elements(By.TAG_NAME, 'div'))
 
-        # Check if the number of articles has stopped increasing
-        if new_divs <= initial_divs:
+        # Checks if the "More" button is still present
+        try:
+            more_button_element = dr.find_element(By.CSS_SELECTOR, 'button[aria-label= "More"]')
+            print("More button found, continuing scrolling........")
+        except NoSuchElementException:
+            print("No more (More) button found, breaking out of the loop........")
             break
-        # Update the initial article count
+
+        new_divs = len(dr.find_elements(By.TAG_NAME, 'article'))
+        print(f'Number of new article elements inside loop: {new_divs}')
+
+        # # Check if the number of elements has stopped increasing
+        # if new_divs <= element_count:
+        #     break
+
+        # Update the initial elements count
+        print(f' element count before: {element_count}')
         element_count = new_divs
+        print(f' element count after: {element_count}')
+
+        count += 1
+        print(f"counter: {count}")
+
+    return dr
 
 
 # ------------------------------------------ QUERY SEARCH DATA -------------------------------------
@@ -175,9 +198,10 @@ if login_twitter(driver, username, password):
         # scroll_page(driver)
 
         # to scroll page to bottom
-        infinite_scroll_using_elements(driver)
+        driver1 = infinite_scroll_using_elements(driver)
 
-        tweets = WebDriverWait(driver, 30).until(
+        # After ending the scrolling, now from here we will scrap the tweets
+        tweets = WebDriverWait(driver1, 60).until(
             EC.visibility_of_all_elements_located((By.XPATH, '//article[@data-testid="tweet"]'))
         )
         print(f"Tweets found: {tweets}\n"
