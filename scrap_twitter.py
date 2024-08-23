@@ -141,10 +141,11 @@ def infinite_scroll_using_elements(dr, scroll, counter, max_elements=20, delay=3
 
     while element_count < max_elements:
         # to break the loop
-        if counter >= 25:
+        if counter >= 20:
             print(f'Counter limit ({counter}) reached for scrolling...........')
             scroll = False
-            break
+            return dr, scroll
+            # break
         # scroll down and wait for the page to load
         body = WebDriverWait(dr, 30).until(
             EC.visibility_of_element_located((By.TAG_NAME, 'body'))
@@ -158,7 +159,9 @@ def infinite_scroll_using_elements(dr, scroll, counter, max_elements=20, delay=3
             print("More button found, continuing scrolling........")
         except NoSuchElementException:
             print("No more (More) button found, breaking out of the loop........")
-            break
+            scroll = False
+            return dr, scroll
+            # break
 
         new_divs = len(dr.find_elements(By.TAG_NAME, 'article'))
         print(f'Number of new article elements inside loop: {new_divs}')
@@ -173,7 +176,10 @@ def infinite_scroll_using_elements(dr, scroll, counter, max_elements=20, delay=3
         print(f' element count after: {element_count}')
 
         print(f"counter inside infinite_scroll: {counter}")
+
         return dr, scroll
+
+    return dr, scroll
 
 
 # ------------------------------------------ QUERY SEARCH DATA -------------------------------------
@@ -202,9 +208,8 @@ if login_twitter(driver, username, password):
         scrolling = True
         while scrolling:
             # to scroll page to bottom
-            driver1, scrolling = infinite_scroll_using_elements(driver, scrolling, count)
-            count += 1
-
+            driver1, scrolling = infinite_scroll_using_elements(driver, scrolling, counter=count)
+            print(f"Scroll value: {scrolling}")
             # After ending the scrolling, now from here we will scrap the tweets
             tweets = WebDriverWait(driver1, 30).until(
                 EC.presence_of_all_elements_located((By.XPATH, '//article[@data-testid="tweet"]'))
@@ -233,8 +238,10 @@ if login_twitter(driver, username, password):
                     user_id_data.append(user_id)
                     tweet_text_data.append(tweet_text)
 
-                print(f"IDs: {user_id_data}\n\n")
-                # print(f"Text: {tweet_text_data}")
+            count += 1
+
+            print(f"IDs: {user_id_data}\n\n")
+            # print(f"Text: {tweet_text_data}")
 
     except (TimeoutException, NoSuchElementException) as e:
         print(f"Error: {str(e)}")
