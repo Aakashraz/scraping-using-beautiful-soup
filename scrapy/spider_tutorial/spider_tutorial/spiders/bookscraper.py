@@ -16,5 +16,7 @@ class BookSpider(CrawlSpider):
         yield{
             'TITLE': response.css('.product_main h1::text').get(),
             'PRICE': response.css('.price_color::text').get(),
-            'AVAILABILITY': response.css('.availability::text').get(),
+            # the below code to fetch availability should use the strip() to remove
+            # '\n' character which is printed ambiguously
+            'AVAILABILITY': response.css('.availability::text')[1].get().strip().replace('\n', ''),
         }
