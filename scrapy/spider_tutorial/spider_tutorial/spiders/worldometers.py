@@ -23,9 +23,29 @@ class WorldometersSpider(scrapy.Spider):
             # yield scrapy.Request(url=absolute_url)
 
             # using relative url
-            yield response.follow(url=link)
+            yield response.follow(url=link, callback=self.parse_country, meta={'country': country_name})
+
+            # Summary
+            #
+            # self is necessary to reference the instance of the class within which methods and variables are defined.
+            # It allows methods to modify the object’s state or access other attributes and methods.
+            # In Scrapy, using self ensures that Scrapy calls the correct instance method when it receives a response.
 
             # yield {
             #     'LINK': link,
             #     'countryName': country_name,
             # }
+
+    def parse_country(self, response):
+        # this country name is fetched from the meta (data) from country inside the for loop of parse() method
+        country_name_from_meta = response.request.meta['country']
+        rows = response.xpath("(//table[contains(@class,'table')])[1]/tbody/tr")
+        for row in rows:
+            year = row.xpath(".//td[1]/text()").get()
+            population = row.xpath(".//td[2]/strong/text()").get()
+
+            yield {
+                'Country Name': country_name_from_meta,
+                'Year': year,
+                'Total Population': population,
+            }
