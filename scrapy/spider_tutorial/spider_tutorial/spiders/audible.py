@@ -6,6 +6,9 @@ class AudibleSpider(scrapy.Spider):
     allowed_domains = ["www.audible.com"]
     start_urls = ["https://www.audible.com/search"]
 
+    def __init__(self):
+        self.counter = 0
+
     # ancestor::li: This part checks if the current <li> has any <li> elements above it
     # in the hierarchy (i.e., if there are any <li> tags that are parents, grandparents, etc., of the current <li>).
     #
@@ -28,3 +31,15 @@ class AudibleSpider(scrapy.Spider):
                 'RUNTIME': book_runtime,
                 'RELEASE DATE': release_date,
             }
+
+        pagination = response.xpath('//ul[contains(@class, "pagingElements")]')
+        next_page_url = pagination.xpath('.//span[contains(@class, "nextButton")]/a/@href').get()
+        # last_page_element = pagination.xpath('(.//span[contains(@class, "pageNumberElement")])[1]/text()').get()
+        # last_page_number = (last_page_element)
+        # print(f'last no. {last_page_number}, type: {type(last_page_number)}')
+
+        if next_page_url:
+            yield response.follow(url=next_page_url, callback=self.parse)
+            # to limit the number of loops
+            print(f'counter{self.counter}')
+            self.counter += 1
