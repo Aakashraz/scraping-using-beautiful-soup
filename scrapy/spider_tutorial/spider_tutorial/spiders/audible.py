@@ -1,4 +1,5 @@
 import scrapy
+import re
 
 
 class AudibleSpider(scrapy.Spider):
@@ -6,8 +7,8 @@ class AudibleSpider(scrapy.Spider):
     allowed_domains = ["www.audible.com"]
     start_urls = ["https://www.audible.com/search"]
 
-    def __init__(self):
-        self.counter = 0
+    # def __init__(self):
+    #     self.counter = 0
 
     # ancestor::li: This part checks if the current <li> has any <li> elements above it
     # in the hierarchy (i.e., if there are any <li> tags that are parents, grandparents, etc., of the current <li>).
@@ -36,24 +37,34 @@ class AudibleSpider(scrapy.Spider):
         pagination = response.xpath('//ul[contains(@class, "pagingElements")]')
         next_page_url = pagination.xpath('.//span[contains(@class, "nextButton")]/a/@href').get()
         print(f'next_page_url:..................{next_page_url}')
+        print(f'response.url:>>>>>>>>>>> {response.url}')
 
-        # Get the current page number
-        print(f'response.url:------------------------- {response.url}')
-        # current_page = int(next_page_url.split('page= ')[-1])
+        # Get the current page number using regular expression
+        # to search for 'page=' followed by digits
+        current_page = None
+        match = re.search(r'page=(\d+)', next_page_url)
 
-        # Get the last page number
-        last_page_element = pagination.xpath('(.//a[contains(@class, "pageNumberElement")])[last()]/text()').get()
-        # print(f'last_page:..............{last_page_element}')
-        if last_page_element and last_page_element.isdigit():
-            last_page = int(last_page_element)
-            print(f'last no. {last_page}, type: {type(last_page)}')
+        # Extract the captured group (the digits after 'page=')
+        if match:
+            current_page = int(match.group(1))
+            print(f'Current page: >>>>>>>>>>{current_page}')
         else:
-            last_page = 100
+            print("Page no. not found in the URL.")
 
-        # if current_page < last_page:
-        #     yield response.follow(url=next_page_url, callback=self.parse)
-        #     # to limit the number of loops
-        #     print(f'counter{self.counter}')
-        #     self.counter += 1
-        # else:
-        #     print("Reached the last page or no more page available.................")
+        # Get the last page number and use a default value if not found
+        try:
+            last_page_element = pagination.xpath('(.//a[contains(@class, "pageNumberElement")])[last()]/text()').get()
+            print(f'last_page_element>>>>>>>>>>>>>{last_page_element}')
+            last_page = int(last_page_element) if last_page_element.isdigit() else 25
+            print(f'last page no:>>>>>>> {last_page}, type>>>>>>>: {type(last_page)}')
+        except (AttributeError, ValueError):
+            last_page = 25
+            print('Failed to extract last page number, hence using default as 100')
+
+        # While conditional checking, to prevents the UnboundLocalError by checking if current_page
+        # has been assigned a value from the URL before using it in the comparison.
+        # Ensuring current_page is not None
+        if current_page is not None and current_page-1 <= last_page:
+            yield response.follow(url=next_page_url, callback=self.parse)
+        else:
+            print("Reached the last page or no more page available.................")
