@@ -12,7 +12,6 @@ BOT_NAME = "spider_tutorial"
 SPIDER_MODULES = ["spider_tutorial.spiders"]
 NEWSPIDER_MODULE = "spider_tutorial.spiders"
 
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "spider_tutorial (+http://www.yourdomain.com)"
 
@@ -37,10 +36,13 @@ ROBOTSTXT_OBEY = True
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-#DEFAULT_REQUEST_HEADERS = {
-#    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-#    "Accept-Language": "en",
-#}
+# DEFAULT_REQUEST_HEADERS = {
+    # "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    # "Accept-Language": "en",
+
+    # another way to change the user agent
+    # 'User_Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0'
+# }
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html

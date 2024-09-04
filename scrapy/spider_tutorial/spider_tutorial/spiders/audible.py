@@ -5,10 +5,15 @@ import re
 class AudibleSpider(scrapy.Spider):
     name = "audible"
     allowed_domains = ["www.audible.com"]
-    start_urls = ["https://www.audible.com/search"]
+    # start_urls = ["https://www.audible.com/search"]
+    # the above statement is not needed since it is called in the start_requests() method.
 
-    # def __init__(self):
-    #     self.counter = 0
+    def start_requests(self):
+        yield scrapy.Request(
+            url='https://www.audible.com/search',
+            callback=self.parse,
+            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0'},
+        )
 
     # ancestor::li: This part checks if the current <li> has any <li> elements above it
     # in the hierarchy (i.e., if there are any <li> tags that are parents, grandparents, etc., of the current <li>).
@@ -32,6 +37,9 @@ class AudibleSpider(scrapy.Spider):
                 'AUTHORS': book_author,
                 'RUNTIME': book_runtime,
                 'RELEASE DATE': release_date,
+
+                # just to check if user-agent in changed or not
+                'User-Agent': response.request.headers['User-Agent'],
             }
 
         pagination = response.xpath('//ul[contains(@class, "pagingElements")]')
@@ -64,7 +72,12 @@ class AudibleSpider(scrapy.Spider):
         # While conditional checking, to prevents the UnboundLocalError by checking if current_page
         # has been assigned a value from the URL before using it in the comparison.
         # Ensuring current_page is not None
-        if current_page is not None and current_page-1 <= last_page:
-            yield response.follow(url=next_page_url, callback=self.parse)
+        if current_page is not None and current_page - 1 <= last_page:
+            yield response.follow(
+                url=next_page_url,
+                callback=self.parse,
+                headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0'},
+            )
         else:
             print("Reached the last page or no more page available.................")
