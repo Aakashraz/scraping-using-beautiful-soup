@@ -12,6 +12,7 @@ __pycache__/
 # output json file
 output.json
 population_by_year.json
+transcript_letter_X.json
 
 # output csv file
 audible_single_page.csv

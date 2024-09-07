@@ -6,7 +6,7 @@ from scrapy.spiders import CrawlSpider, Rule
 class TranscriptSpider(CrawlSpider):
     name = "transcript"
     allowed_domains = ["subslikescript.com"]
-    start_urls = ["https://subslikescript.com/movies"]
+    start_urls = ["https://subslikescript.com/movies_letter-X"]     # for less no of pages to crawl
 
     # Key Concepts:
     #
@@ -14,7 +14,8 @@ class TranscriptSpider(CrawlSpider):
     #     callback: Specifies the method to call when certain links are followed (e.g., parse_item).
     #     Rules: Define how the spider behaves when encountering links on the page (whether to follow or extract data).
     rules = (
-        Rule(LinkExtractor(restrict_xpaths=("//ul[@class='scripts-list']/li/a")), callback="parse_item", follow=True),
+        Rule(LinkExtractor(restrict_xpaths="//ul[@class='scripts-list']/li/a"), callback="parse_item", follow=True),
+        Rule(LinkExtractor(restrict_xpaths="(//a[@rel='next'])[1]"), follow=True),
     )
     # Extracting the data from matching websites in the LinkExtractor is:
     #     Recursive Behavior: The process of following links and handling responses is recursive.
@@ -31,6 +32,6 @@ class TranscriptSpider(CrawlSpider):
         yield {
             'title': article.xpath('./h1/text()').get().split('-')[0],
             'plot': article.xpath('./p/text()').get(),
-            'Full-Script': article.xpath('./div[@class="full-script"]/text()').getall(),
+            # 'Full-Script': article.xpath('./div[@class="full-script"]/text()').getall(),
             'URL': response.url,
         }
