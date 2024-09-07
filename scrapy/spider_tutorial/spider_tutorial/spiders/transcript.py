@@ -6,7 +6,7 @@ from scrapy.spiders import CrawlSpider, Rule
 class TranscriptSpider(CrawlSpider):
     name = "transcript"
     allowed_domains = ["subslikescript.com"]
-    start_urls = ["https://subslikescript.com/movies_letter-Z"]     # for less no of pages to crawl
+    start_urls = ["https://subslikescript.com/movies_letter-X"]     # for less no of pages to crawl
 
     # Key Concepts:
     #
