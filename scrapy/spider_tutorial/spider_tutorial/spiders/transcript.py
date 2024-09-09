@@ -71,9 +71,10 @@ class TranscriptSpider(CrawlSpider):
         yield {
             'title': article.xpath('./h1/text()').get().split('-')[0],
             'plot': article.xpath('./p/text()').get(),
-            # 'Full-Script': article.xpath('./div[@class="full-script"]/text()').getall(),
+            'Full-Script': article.xpath('./div[@class="full-script"]/text()').getall(),
             'URL': response.url,
-            'USER-AGENT': user_agent_str,
+            # to check the user-agent
+            # 'USER-AGENT': user_agent_str,
         }
 
 # Why You Need Both
