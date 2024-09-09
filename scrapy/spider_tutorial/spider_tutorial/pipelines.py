@@ -7,7 +7,29 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 
+import logging
+import pymongo
+import os
+from dotenv import load_dotenv
 
-class SpiderTutorialPipeline:
+load_dotenv(override=True)
+mongo_uri = os.getenv("MONGODB_URI")
+
+
+class MongodbPipeline:
+    collection_name = 'transcript'
+
+    def open_spider(self, spider):
+        self.client = pymongo.MongoClient(mongo_uri)
+        self.db = self.client['My_Database']
+        logging.info("Spider opened: connected to MongoDB")
+        # logging.warning('Spider Opened - Pipeline')
+
+    def close_spider(self, spider):
+        # logging.warning('Spider Closed - Pipeline')
+        self.client.close()
+        logging.info("Spider closed: MongoDB connection closed")
+
     def process_item(self, item, spider):
+        self.db[self.collection_name].insert(item)
         return item
