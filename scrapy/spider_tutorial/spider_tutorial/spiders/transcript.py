@@ -63,6 +63,9 @@ class TranscriptSpider(CrawlSpider):
     # (like the "next" page). You want to ensure that all those subsequent requests also use the correct User-Agent.
 
     def parse_item(self, response):
+        # Force encoding to UTF-8
+        response.replace(encoding='utf-8')
+
         article = response.xpath('//article[@class="main-article"]')
         # print(response.url)
         # This converts the byte string back to a regular string (str) in Python, which will not display the b prefix when printed.

@@ -2,28 +2,31 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-import pymongo
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 
+import pymongo
 import logging
 import os
 from dotenv import load_dotenv
 import sys
+import site
+
 
 load_dotenv(override=True)
 mongo_uri = os.getenv("MONGODB_URI")
 
-print("python executable:", sys.executable)
-print(f"sys.path: {sys.path}")
+# print("python executable:", sys.executable)
+# print(f"sys.path: {sys.path}")
+# print(site.getsitepackages())
 
 
 class MongodbPipeline:
     collection_name = 'transcript'
 
-    def __init__(self):
-        self.db = None
-        self.client = None
+    # def __init__(self):
+    #     self.db = None
+    #     self.client = None
 
     def open_spider(self, spider):
         self.client = pymongo.MongoClient(mongo_uri)
