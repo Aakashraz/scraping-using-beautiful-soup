@@ -77,7 +77,7 @@ class TranscriptSpider(CrawlSpider):
             # 'USER-AGENT': user_agent_str,
         }
 
-# Why You Need Both
+# Why You Need Both methods mentioned above as, start_requests() and set_user_agent();
 #
 #     start_requests(): This is for the initial requests to kick off the spider and load the first page.
 #     These are explicitly defined by you.
