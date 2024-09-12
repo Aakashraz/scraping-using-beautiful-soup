@@ -24,10 +24,6 @@ mongo_uri = os.getenv("MONGODB_URI")
 class MongodbPipeline:
     collection_name = 'transcript'
 
-    # def __init__(self):
-    #     self.db = None
-    #     self.client = None
-
     def open_spider(self, spider):
         self.client = pymongo.MongoClient(mongo_uri)
         self.db = self.client['My_Database']
@@ -40,5 +36,5 @@ class MongodbPipeline:
         logging.info("Spider closed: MongoDB connection closed")
 
     def process_item(self, item, spider):
-        self.db[self.collection_name].insert(item)
+        self.db[self.collection_name].insert_one(item)
         return item
