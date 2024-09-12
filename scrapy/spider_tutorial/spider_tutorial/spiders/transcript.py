@@ -5,6 +5,9 @@ from scrapy.spiders import CrawlSpider, Rule
 
 class TranscriptSpider(CrawlSpider):
     name = "transcript"
+    # custom_settings = {
+    #     'FEED_EXPORT_ENCODING': 'utf-8',
+    # }
     allowed_domains = ["subslikescript.com"]
     # start_urls = ["https://subslikescript.com/movies_letter-X"]     # for less no of pages to crawl
     user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0'
@@ -63,6 +66,13 @@ class TranscriptSpider(CrawlSpider):
     # (like the "next" page). You want to ensure that all those subsequent requests also use the correct User-Agent.
 
     def parse_item(self, response):
+        print(f'type of response.encoding:{type(response.encoding)}, {response.encoding}---------------------------')  # This should print <class 'str'> 'utf-8'
+
+        # Explicitly decode the response body
+        # response = response.replace
+        # Force encoding to UTF-8
+        # response.replace(encoding='utf-8')
+
         article = response.xpath('//article[@class="main-article"]')
         # print(response.url)
         # This converts the byte string back to a regular string (str) in Python, which will not display the b prefix when printed.
@@ -77,7 +87,7 @@ class TranscriptSpider(CrawlSpider):
             # 'USER-AGENT': user_agent_str,
         }
 
-# Why You Need Both
+# Why You Need Both methods mentioned above as, start_requests() and set_user_agent();
 #
 #     start_requests(): This is for the initial requests to kick off the spider and load the first page.
 #     These are explicitly defined by you.

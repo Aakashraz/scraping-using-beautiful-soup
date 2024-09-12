@@ -2,18 +2,23 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-
-
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 
-import logging
 import pymongo
+import logging
 import os
 from dotenv import load_dotenv
+import sys
+import site
+
 
 load_dotenv(override=True)
 mongo_uri = os.getenv("MONGODB_URI")
+
+# print("python executable:", sys.executable)
+# print(f"sys.path: {sys.path}")
+# print(site.getsitepackages())
 
 
 class MongodbPipeline:
@@ -31,5 +36,5 @@ class MongodbPipeline:
         logging.info("Spider closed: MongoDB connection closed")
 
     def process_item(self, item, spider):
-        self.db[self.collection_name].insert(item)
+        self.db[self.collection_name].insert_one(item)
         return item
