@@ -22,7 +22,7 @@ mongo_uri = os.getenv("MONGODB_URI")
 
 
 class MongodbPipeline:
-    collection_name = 'transcript'
+    collection_name = 'full_transcript'
 
     def open_spider(self, spider):
         self.client = pymongo.MongoClient(mongo_uri)

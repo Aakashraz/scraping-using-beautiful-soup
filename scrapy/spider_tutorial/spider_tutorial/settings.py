@@ -95,4 +95,4 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 
 # Enable detailed logging for debugging issues
-LOG_LEVEL = 'DEBUG'
+LOG_LEVEL = 'WARNING'
