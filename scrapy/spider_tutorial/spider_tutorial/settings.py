@@ -65,7 +65,8 @@ DOWNLOAD_DELAY = 0.5
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   "spider_tutorial.pipelines.MongodbPipeline": 300,
+   "spider_tutorial.pipelines.MongodbPipeline": None,
+   "spider_tutorial.pipelines.SQLitePipeline": 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -95,4 +96,4 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 
 # Enable detailed logging for debugging issues
-LOG_LEVEL = 'DEBUG'
+LOG_LEVEL = 'WARNING'
