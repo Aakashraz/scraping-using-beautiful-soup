@@ -65,6 +65,22 @@ class TranscriptSpider(CrawlSpider):
     # This is for all subsequent requests generated automatically by Scrapy when following links
     # (like the "next" page). You want to ensure that all those subsequent requests also use the correct User-Agent.
 
+
+    # Method to extract the full_scripts without the first line
+    # BUT THIS METHOD IS MAKING THE SYSTEM OUTPUT VERY SLOW BY SEPARATING WITH LETTERS AS: 'w e a r e h a p p y'
+    # HENCE NOT USING AT THE MOMENT
+    def extract_transcript(self, response):
+        # Extract all text nodes, including the first line
+        transcript_nodes = response.xpath('./div[@class="full-script"]/text() | ./div[@class="full-script"]/br/following-sibling::text()').getall()
+        # Remove empty string and strip whitespace
+        transcript_lines = [line.strip() for line in transcript_nodes if line.strip()]
+        # The above line will: Process each line and remove leading/trailing whitespace.
+        # Filter out lines that only contain whitespace (like " " and "\n").
+
+        # skip the first line and join the rest
+        transcript = '\n'.join(transcript_lines[1:])
+        return transcript
+
     def parse_item(self, response):
         print(f'type of response.encoding:{type(response.encoding)}, {response.encoding}---------------------------')  # This should print <class 'str'> 'utf-8'
 
@@ -78,11 +94,16 @@ class TranscriptSpider(CrawlSpider):
         # This converts the byte string back to a regular string (str) in Python, which will not display the b prefix when printed.
         user_agent_str = response.request.headers['User-Agent'].decode('utf-8')
 
+        # to change the transcript_list into transcript_string
+        # transcript_list = self.extract_transcript(article)
+        transcript_list = article.xpath('./div[@class="full-script"]/text()').getall()
+        transcript_string = ' '.join(transcript_list)
+
         yield {
             'title': article.xpath('./h1/text()').get().split('-')[0],
             'plot': article.xpath('./p/text()').get(),
-            'Full-Script': article.xpath('./div[@class="full-script"]/text()').getall(),
-            'URL': response.url,
+            'full_script': transcript_string,
+            'url': response.url,
             # to check the user-agent
             # 'USER-AGENT': user_agent_str,
         }
