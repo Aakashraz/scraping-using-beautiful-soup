@@ -1,0 +1,13 @@
+# Ignore scrapy cache
+.scrapy/
+
+# Ignore log files
+*.log
+
+# Ignore Python compiled files
+*.pyc
+*.pyo
+__pycache__/
+
+# ignre json file
+quotes.json
