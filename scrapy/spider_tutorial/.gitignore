@@ -19,3 +19,6 @@ audible_single_page.csv
 audible_multiple_page.csv
 audible_multiple_page2.csv
 audible_multiple_page3.csv
+
+# SQLite3
+transcripts.db
