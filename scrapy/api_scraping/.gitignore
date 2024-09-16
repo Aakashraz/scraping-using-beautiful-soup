@@ -11,3 +11,4 @@ __pycache__/
 
 # ignre json file
 quotes.json
+quotes_paginate_data.json
