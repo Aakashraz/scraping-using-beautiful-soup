@@ -2,8 +2,17 @@ import logging
 
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(filename='employee.log', level=logging.INFO,
-                    format='%(asctime)s: %(levelname)s: %(name)s: %(message)s')
+logger.setLevel(logging.DEBUG)
+
+formating = logging.Formatter('%(asctime)s: %(levelname)s: %(message)s')
+file_handler = logging.FileHandler('employee.log')
+file_handler.setFormatter(formating)
+file_handler.setLevel(logging.ERROR)
+
+logger.addHandler(file_handler)
+
+# logging.basicConfig(filename='employee.log', level=logging.INFO,
+#                     format='%(asctime)s: %(levelname)s: %(name)s: %(message)s')
 
 
 class Employee:
