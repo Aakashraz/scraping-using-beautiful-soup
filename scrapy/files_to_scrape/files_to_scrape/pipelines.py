@@ -38,8 +38,26 @@ class BooksToScrapePipeline(ImagesPipeline):
 
     def clean_bookname(self, bookname):
         # Remove or replace characters that are unsafe for filenames
-        unsafe_chars = '<>:"/\\|?'
+        unsafe_chars = '<>:"/\\|?*'
         for char in unsafe_chars:
             bookname = bookname.replace(char, '_')
         # Limit the length of the bookname to avoid issues with long filenames
         return bookname[:100]
+
+    # Illustration of this method with an example:
+    # Suppose we have a book name: "Alice's Adventures in Wonderland: A Classic Tale?"
+    # The method will process this string as follows:
+    #
+    # It will first replace the : with _
+    # Result: "Alice's Adventures in Wonderland_ A Classic Tale?"
+    # Then it will replace the ? with _
+    # Final result: "Alice's Adventures in Wonderland_ A Classic Tale_"
+    #
+    # If we had a more problematic title like "Alice/Wonderland: A <Tale> of Wonder?*", the process would be:
+    #
+    # Replace / → "Alice_Wonderland: A <Tale> of Wonder?*"
+    # Replace : → "Alice_Wonderland_ A <Tale> of Wonder?*"
+    # Replace < → "Alice_Wonderland_ A _Tale> of Wonder?*"
+    # Replace > → "Alice_Wonderland_ A _Tale_ of Wonder?*"
+    # Replace ? → "Alice_Wonderland_ A _Tale_ of Wonder_*"
+    # Replace * → "Alice_Wonderland_ A _Tale_ of Wonder__"
