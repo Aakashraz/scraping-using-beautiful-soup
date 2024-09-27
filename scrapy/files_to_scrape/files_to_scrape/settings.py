@@ -12,7 +12,6 @@ BOT_NAME = "files_to_scrape"
 SPIDER_MODULES = ["files_to_scrape.spiders"]
 NEWSPIDER_MODULE = "files_to_scrape.spiders"
 
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "files_to_scrape (+http://www.yourdomain.com)"
 
@@ -63,7 +62,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   # "files_to_scrape.pipelines.FilesToScrapePipeline": 300,
+    # "files_to_scrape.pipelines.FilesToScrapePipeline": 300,
     "scrapy.pipelines.images.ImagesPipeline": 1,
 }
 
