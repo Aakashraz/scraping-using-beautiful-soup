@@ -27,4 +27,4 @@ class AdamchoiSpider(scrapy.Spider):
                             endpoint="execute", args={'lua_source': self.script})
 
     def parse(self, response):
-        print(f'printing...................{response.body}')
+        print(f'printing...................{response.url}')
