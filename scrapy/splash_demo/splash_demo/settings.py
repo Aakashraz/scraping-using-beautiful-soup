@@ -12,7 +12,6 @@ BOT_NAME = "splash_demo"
 SPIDER_MODULES = ["splash_demo.spiders"]
 NEWSPIDER_MODULE = "splash_demo.spiders"
 
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "splash_demo (+http://www.yourdomain.com)"
 
@@ -44,15 +43,19 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    "splash_demo.middlewares.SplashDemoSpiderMiddleware": 543,
-#}
+SPIDER_MIDDLEWARES = {
+    # "splash_demo.middlewares.SplashDemoSpiderMiddleware": 543,
+    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    "splash_demo.middlewares.SplashDemoDownloaderMiddleware": 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+    # "splash_demo.middlewares.SplashDemoDownloaderMiddleware": 543,
+    'scrapy_splash.SplashCookiesMiddleware': 723,
+    'scrapy_splash.SplashMiddleware': 725,
+    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -91,3 +94,8 @@ ROBOTSTXT_OBEY = True
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+# splash server address setting
+SPLASH_URL = 'http://0.0.0.0:8050'
+
+DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
