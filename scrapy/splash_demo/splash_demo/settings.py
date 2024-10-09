@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = "splash_demo.spiders"
 #USER_AGENT = "splash_demo (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -92,12 +92,13 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 
 # splash server address setting
-SPLASH_URL = 'http://0.0.0.0:8050/'
+SPLASH_URL = 'http://localhost:8050/'
 
 # Enable Splash middleware
 DOWNLOADER_MIDDLEWARES = {
     'scrapy_splash.SplashCookiesMiddleware': 723,
     'scrapy_splash.SplashMiddleware': 725,
+    'scrapy.downloadermiddlewares.offsite.OffsiteMiddleware': None,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
 }
 
