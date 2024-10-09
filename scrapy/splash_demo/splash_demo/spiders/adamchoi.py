@@ -27,4 +27,18 @@ class AdamchoiSpider(scrapy.Spider):
                             endpoint="execute", args={'lua_source': self.script})
 
     def parse(self, response):
-        print(f'printing...................{response.url}')
+        print(f'url-------------->>>>>>>>>>>>>>>>>>{response.url}')
+        rows = response.xpath('//tr')
+        print(type(rows))
+        print(rows)
+        # for row in rows[:4]:
+        #     date = row.xpath('./td[1]/text()').get()
+        #     home_team = row.xpath('./td[2]/text()').get()
+        #     score = row.xpath('./td[3]/text()').get()
+        #     away_team = row.xpath('./td[4]/text()').get()
+        #     yield {
+        #         'date': date,
+        #         'home_team': home_team,
+        #         'score': score,
+        #         'away_team': away_team,
+        #     }
