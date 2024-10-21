@@ -19,6 +19,12 @@ class AdamchoiSpider(scrapy.Spider):
             return splash:html()
         end
     '''
+    # cannot use the following return statement because it yields the ValueError as
+    # return {
+    #     splash:html(),
+    #     splash:png()
+    # }
+    # ValueError: Cannot use xpath on a Selector of type 'json'
 
     def start_requests(self):
         yield SplashRequest(url="https://www.adamchoi.co.uk/overs/detailed", callback=self.parse,
@@ -27,7 +33,7 @@ class AdamchoiSpider(scrapy.Spider):
     def parse(self, response):
         print(f'body-------------->>>>>>>>>>>>>>>>>>{type(response.body)}')
 
-        rows = response.xpath('//tr')
+        rows = response.xpath('//tr[contains(@class,"HighlightedRow")]')
         for row in rows:
             print(type(row))
             print(row)
