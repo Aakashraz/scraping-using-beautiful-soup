@@ -16,7 +16,7 @@ class AdamchoiSpider(scrapy.Spider):
             all_matches[2]:mouse_click()
             assert(splash:wait(3))
             splash:set_viewport_full()
-            return {splash:png(), splash:html()}
+            return splash:html()
         end
     '''
 
